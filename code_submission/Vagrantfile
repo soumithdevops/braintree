@@ -1,0 +1,14 @@
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/contrib-jessie64"
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y puppet
+  SHELL
+  config.vm.provision "puppet" do |puppet|
+    puppet.options = "--parser future"
+    puppet.manifests_path = "."
+    puppet.manifest_file = "beelzebub.pp"
+  end
+end

@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler/setup'
+require 'rest_client'
+require 'json'
+
+pids=[]
+
+Signal.trap('INT') {
+  Process.waitall
+  exit 0
+}
+Signal.trap('TERM'){
+  Process.waitall
+  exit 0
+}
+
+while true
+  pid = fork do
+    randgen = Random.new
+    sleep randgen.rand(0.1..0.2)
+    json_data = {':amount' => randgen.rand(0..100), ':card' => randgen.rand(1111111111111111..9999999999999999)}.to_json
+    response = RestClient.post 'http://localhost:8080/transaction/', {:data => json_data}, {:content_type => :json, :accept => :json}
+  end
+  pids.unshift(pid)
+  while pids.length > 20
+    pid, status = Process.waitpid2(pids.pop)
+    if status.exitstatus != 0
+      Process.waitall
+      STDERR.puts 'Requests are failing, exiting!'
+      exit 1
+    end
+  end
+end

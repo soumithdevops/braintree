@@ -1,0 +1,9 @@
+#!/bin/bash
+
+PATH=$HOME/.gem/bin:$PATH
+
+mkdir -p tmp data log
+mkdir -p tmp/pids
+mkdir -p tmp/sockets
+
+unicorn -c unicorn.rb -l 0.0.0.0:8080
